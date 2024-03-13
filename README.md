@@ -86,3 +86,5 @@ In future you could modify it to accept pricing rules from different file format
 - Static analysis
 - Goroutines
 - Creating a CLI script with flags to input pricing rules and skus e.g. using cobra
+- Logging
+- Metrics
