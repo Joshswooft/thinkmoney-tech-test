@@ -1,6 +1,7 @@
 package checkout
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"os"
@@ -163,6 +164,46 @@ func TestSkuScanner_Scan(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("SkuScanner.Scan() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestNewSkuScanner(t *testing.T) {
+
+	buffer := bytes.NewBuffer(nil)
+
+	type args struct {
+		reader io.Reader
+	}
+	tests := []struct {
+		name string
+		args args
+		want *skuScanner
+		err  error
+	}{
+		{
+			name: "empty reader returns error",
+			args: args{reader: nil},
+			want: nil,
+			err:  errNilReaderProvided,
+		},
+		{
+			name: "successful scanner init",
+			args: args{reader: buffer},
+			want: &skuScanner{reader: buffer},
+			err:  nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewSkuScanner(tt.args.reader)
+			if err != tt.err {
+				t.Errorf("NewSkuScanner() error = %v, wantErr %v", err, tt.err)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewSkuScanner() = %v, want %v", got, tt.want)
 			}
 		})
 	}
