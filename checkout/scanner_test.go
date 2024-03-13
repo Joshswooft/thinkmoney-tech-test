@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/Joshswooft/thinkmoney-test/sku"
 )
 
 const nullCharacter = '\x00'
@@ -92,6 +95,74 @@ func TestStringScanner_Read(t *testing.T) {
 
 			if got != tt.want {
 				t.Errorf("scanner results are incorrect! got: '%q', want: '%q'", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestSkuScanner_Scan(t *testing.T) {
+
+	skuGen := func(r rune) sku.SKU {
+		return skuGenerator(t, r)
+	}
+
+	file, err := os.Open("./testdata/skus.txt")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	defer file.Close()
+
+	type fields struct {
+		reader io.Reader
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   sku.SKU
+		err    error
+	}{
+		{
+			name:   "should return valid sku",
+			fields: fields{reader: strings.NewReader("z")},
+			want:   skuGen('Z'),
+			err:    nil,
+		},
+		{
+			name:   "should return a sku error",
+			fields: fields{reader: strings.NewReader("69")},
+			want:   sku.SKU{},
+			err:    sku.ErrNoSpecialCharacters,
+		},
+		{
+			name:   "should return an empty sku when given an empty input",
+			fields: fields{reader: strings.NewReader("")},
+			want:   sku.SKU{},
+			err:    io.EOF,
+		},
+		{
+			name:   "reads in first sku from a file",
+			fields: fields{reader: file},
+			want:   skuGen('G'),
+			err:    nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s, err := NewSkuScanner(tt.fields.reader)
+
+			if err != nil {
+				t.Errorf("failed to initialize scanner, error = %v", err)
+			}
+
+			got, err := s.Scan()
+			if err != tt.err {
+				t.Errorf("SkuScanner.Scan() error = %v, wantErr %v", err, tt.err)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SkuScanner.Scan() = %v, want %v", got, tt.want)
 			}
 		})
 	}

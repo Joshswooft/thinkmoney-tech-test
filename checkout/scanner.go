@@ -3,6 +3,7 @@ package checkout
 import (
 	"errors"
 	"io"
+	"log"
 
 	"github.com/Joshswooft/thinkmoney-test/sku"
 )
@@ -47,4 +48,22 @@ func (s *skuScanner) Read(p []byte) (int, error) {
 	copy(p, buf)
 
 	return bytesRead, nil
+}
+
+// scans a single sku, for use wrap in an infinite loop and scan until io.EOF or internal err
+func (s *skuScanner) Scan() (sku.SKU, error) {
+	var b [1]byte
+	_, err := s.Read(b[:])
+	if err != nil {
+		return sku.SKU{}, err
+	}
+
+	// Validate and create SKU directly from byte
+	skuInstance, err := sku.New(rune(b[0]))
+	if err != nil {
+		log.Printf("error reading in sku: err: %v, b: '%q'", err, string(b[0]))
+		return sku.SKU{}, err
+	}
+
+	return skuInstance, nil
 }
