@@ -1,8 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io"
 	"log"
+	"strings"
 
 	"github.com/Joshswooft/thinkmoney-test/checkout"
 	"github.com/Joshswooft/thinkmoney-test/pricing"
@@ -12,6 +15,12 @@ import (
 
 func main() {
 	input := "a69B$42*0(Cdb"
+
+	scanner, err := checkout.NewSkuScanner(strings.NewReader(input))
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	skuA, _ := sku.New('A')
 	skuB, _ := sku.New('B')
@@ -33,15 +42,30 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for i := 0; i < len(input); i++ {
-		r := rune(input[i])
-		skuInstance, err := sku.New(r)
+	buf := make([]byte, 64)
 
-		if err != nil {
-			log.Println(err)
+	for {
+		bytesRead, err := scanner.Read(buf)
+
+		if err == io.EOF {
+			break
 		}
 
-		ch.Scan(skuInstance, *quantity.New(1))
+		if errors.Is(err, sku.ErrNoSpecialCharacters) {
+			continue
+		}
+
+		for i := 0; i < bytesRead; i++ {
+			r := rune(input[i])
+			skuInstance, err := sku.New(r)
+
+			if err != nil {
+				log.Println(err)
+			}
+
+			ch.Scan(skuInstance, *quantity.New(1))
+		}
+
 	}
 
 	total := ch.GetTotalPrice()
