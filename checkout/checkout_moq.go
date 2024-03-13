@@ -1,10 +1,33 @@
 package checkout
 
 import (
+	"io"
+
 	"github.com/Joshswooft/thinkmoney-test/currency"
 	"github.com/Joshswooft/thinkmoney-test/quantity"
 	"github.com/Joshswooft/thinkmoney-test/sku"
 )
+
+// MockScanner is a mock implementation of Scanner for testing purposes.
+type MockScanner struct {
+	Items    []sku.SKU
+	Position int
+	Err      error
+}
+
+// Scan simulates scanning items using the mock scanner.
+func (m *MockScanner) Scan() (sku.SKU, error) {
+	if m.Err != nil {
+		return sku.SKU{}, m.Err
+	}
+
+	if m.Position >= len(m.Items) {
+		return sku.SKU{}, io.EOF
+	}
+	item := m.Items[m.Position]
+	m.Position++
+	return item, nil
+}
 
 // MockBasketStorage is a mock implementation of Basket for testing purposes.
 type MockBasketStorage struct {
