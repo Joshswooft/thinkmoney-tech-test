@@ -22,3 +22,30 @@ interface ICheckout
     int GetTotalPrice();
 }
 ```
+
+## Running the application
+
+```sh
+go run main.go
+```
+
+## Building the application
+
+This command will create a binary which can then be run from your shell.
+
+```sh
+go build -o bin/checkout
+```
+
+To run:
+
+```sh
+./bin/checkout
+```
+
+
+## Running tests
+
+```sh
+go test ./...
+```
