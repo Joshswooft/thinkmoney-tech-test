@@ -1,7 +1,9 @@
 package checkout
 
 import (
+	"fmt"
 	"io"
+	"os"
 	"strings"
 	"testing"
 )
@@ -20,6 +22,14 @@ func TestStringScanner_Read(t *testing.T) {
 	type fields struct {
 		reader io.Reader
 	}
+
+	file, err := os.Open("./testdata/skus.txt")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	defer file.Close()
 
 	tests := []struct {
 		name       string
@@ -51,6 +61,14 @@ func TestStringScanner_Read(t *testing.T) {
 			bufferSize: 9,
 			want:       "ABCD",
 			wantPos:    9,
+			err:        nil,
+		},
+		{
+			name:       "reads data in from a file",
+			fields:     fields{reader: file},
+			bufferSize: 20,
+			want:       "GUMMYBAR",
+			wantPos:    10,
 			err:        nil,
 		},
 	}
