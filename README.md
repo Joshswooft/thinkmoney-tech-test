@@ -23,6 +23,10 @@ interface ICheckout
 }
 ```
 
+## Prerequisites
+
+A version of golang will be needed (version: 1.21).
+
 ## Running the application
 
 ```sh
