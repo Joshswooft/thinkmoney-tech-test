@@ -49,3 +49,36 @@ To run:
 ```sh
 go test ./...
 ```
+
+## Improvements
+
+Here is a list of improvements which could be made:
+
+### Adding contexts
+
+By adding contexts we can free up resources e.g. a database connection or cancel long running tasks i.e. the ScanItems().
+
+These would typically be used on the Basket and the Checkout.
+
+### Better scanner
+
+Currently the scanner can read from anything that implements `io.Reader` this includes strings, files, buffers, network streams, http requests etc. 
+
+However for streaming data we don't have any control over the stream. Cancelling a long running stream could be done with the help of a context but being able to resume a stream in this implementation is not possible. It could be nice to add this option by simply following the implementation of an `io.ReaderSeeker` or using something like `bufio` so you can read the input from the last token you read.
+
+If the product data got more complicated then you could easily use the Scanner interface to create a new scanner implementation e.g. JSON.
+
+### Pricing rules
+
+The pricing rules fits the task at hand but would need to be modified to do anything more advanced, it also has the drawback of not being go-routine safe (out of time).
+
+In future you could modify it to accept pricing rules from different file formats: e.g. json, yaml, csv etc.
+
+
+### Misc
+
+- CI/CD (Github Actions)
+- Pre-commit hooks
+- Static analysis
+- Goroutines
+- Creating a CLI script with flags to input pricing rules and skus e.g. using cobra
