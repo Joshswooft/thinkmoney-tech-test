@@ -26,6 +26,9 @@ type Basket interface {
 	// Gets an item by it's product SKU
 	// if the item is not found then it returns a checkout.ErrItemNotFound error
 	GetItem(sku sku.SKU) (qty quantity.Quantity, err error)
+
+	// runs the iterator func over every item in the basket
+	Range(iterator func(id itemID, quantity quantity.Quantity))
 }
 
 func NewCheckout(pricingRules PricingRules, basket Basket) (*checkout, error) {
@@ -76,7 +79,14 @@ func (c *checkout) Scan(sku sku.SKU, quantity quantity.Quantity) error {
 }
 
 func (c *checkout) GetTotalPrice() currency.Pence {
-	totalPrice := currency.Pence(10)
+	totalPrice := currency.Pence(0)
+
+	adder := func(sku itemID, qty quantity.Quantity) {
+		price := c.pricingRules.GetPrice(sku, qty)
+		totalPrice += price
+	}
+
+	c.basket.Range(adder)
 
 	return totalPrice
 

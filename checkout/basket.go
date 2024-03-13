@@ -58,3 +58,15 @@ func (b *basket) GetItem(sku sku.SKU) (qty quantity.Quantity, err error) {
 	return qty, nil
 
 }
+
+// Range loops through all the items and applies your function on each iteration
+// operation is go-routine safe
+// if you required anything different you would probably refactor this to create transactions for the outside users or could use googles sync.Map
+func (b *basket) Range(iterator func(id itemID, quantity quantity.Quantity)) {
+	b.mu.RLock()
+	defer b.mu.RUnlock()
+
+	for id, qty := range b.items {
+		iterator(id, qty)
+	}
+}

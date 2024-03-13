@@ -150,6 +150,36 @@ func Test_checkout_GetTotalPrice(t *testing.T) {
 			},
 			want: 10,
 		},
+		{
+			name: "adds total price for multiple items",
+			fields: fields{
+				basket: &MockBasketStorage{
+					Items: map[sku.SKU]quantity.Quantity{skuGen('A'): *quantity.New(1), skuGen('B'): *quantity.New(2)},
+				},
+				pricingRules: &pricing.SimplePricing{
+					UnitPrices: map[sku.SKU]currency.Pence{skuGen('A'): 10, skuGen('B'): 20},
+				},
+			},
+			want: 50,
+		},
+		{
+			name: "calculates special pricing",
+			fields: fields{
+				basket: &MockBasketStorage{
+					Items: map[sku.SKU]quantity.Quantity{skuGen('A'): *quantity.New(3), skuGen('B'): *quantity.New(2)},
+				},
+				pricingRules: &pricing.SpecialPricing{
+					Config: map[sku.SKU]pricing.PricingData{
+						skuGen('A'): {
+							UnitPrice:       10,
+							SpecialPrice:    5,
+							SpecialQuantity: *quantity.New(3),
+						},
+					},
+				},
+			},
+			want: 5,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

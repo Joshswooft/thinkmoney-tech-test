@@ -30,6 +30,12 @@ func (m *MockBasketStorage) GetItem(sku sku.SKU) (qty quantity.Quantity, err err
 	return qty, nil
 }
 
+func (m *MockBasketStorage) Range(iterator func(id itemID, quantity quantity.Quantity)) {
+	for id, qty := range m.Items {
+		iterator(id, qty)
+	}
+}
+
 // MockPricingRules is a mock implementation of PricingRules for testing purposes.
 type MockPricingRules struct {
 	Prices map[sku.SKU]currency.Pence
