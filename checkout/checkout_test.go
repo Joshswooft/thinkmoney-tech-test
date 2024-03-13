@@ -1,6 +1,7 @@
 package checkout
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/Joshswooft/thinkmoney-test/currency"
@@ -109,6 +110,55 @@ func Test_checkout_Scan(t *testing.T) {
 					t.Errorf("basket quantity not expected, got: %d, expected: %d", gotQty, tt.qty)
 				}
 
+			}
+		})
+	}
+}
+
+func skuGenerator(t *testing.T, r rune) sku.SKU {
+	s, err := sku.New(r)
+	if err != nil {
+		t.Errorf("failed to make sku, input: %c, err: %v", r, err)
+	}
+	return s
+}
+
+func Test_checkout_GetTotalPrice(t *testing.T) {
+
+	skuGen := func(r rune) sku.SKU {
+		return skuGenerator(t, r)
+	}
+
+	type fields struct {
+		basket       Basket
+		pricingRules PricingRules
+	}
+	tests := []struct {
+		name   string
+		fields fields
+		want   currency.Pence
+	}{
+		{
+			name: "gets the price of a single item",
+			fields: fields{
+				basket: &MockBasketStorage{
+					Items: map[sku.SKU]quantity.Quantity{skuGen('A'): *quantity.New(1)},
+				},
+				pricingRules: &pricing.SimplePricing{
+					UnitPrices: map[sku.SKU]currency.Pence{skuGen('A'): 10},
+				},
+			},
+			want: 10,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := &checkout{
+				basket:       tt.fields.basket,
+				pricingRules: tt.fields.pricingRules,
+			}
+			if got := c.GetTotalPrice(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("checkout.GetTotalPrice() = %v, want %v", got, tt.want)
 			}
 		})
 	}

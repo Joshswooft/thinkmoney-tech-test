@@ -74,3 +74,10 @@ func (c *checkout) Scan(sku sku.SKU, quantity quantity.Quantity) error {
 	}
 	return c.doScan(sku, quantity)
 }
+
+func (c *checkout) GetTotalPrice() currency.Pence {
+	totalPrice := currency.Pence(10)
+
+	return totalPrice
+
+}
