@@ -171,3 +171,4 @@ In future you could modify it to accept pricing rules from different file format
 - Creating a CLI script with flags to input pricing rules and skus e.g. using cobra
 - Logging
 - Metrics
+- Mocks could be generated from library e.g. gomock, mockery etc. This way they are kept up to date with implementation
